@@ -3,6 +3,8 @@ package main
 import (
 	"fam/config"
 	"fmt"
+
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
@@ -12,4 +14,5 @@ func main() {
 	if err := db.Ping(); err != nil {
 		panic(err)
 	}
+	config.MigrateDB(db)
 }
