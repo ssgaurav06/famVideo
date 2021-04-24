@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fam/client"
 	"fam/config"
 	"fmt"
 
@@ -15,4 +16,5 @@ func main() {
 		panic(err)
 	}
 	config.MigrateDB(db)
+	client.GetYoutubeClient()
 }
