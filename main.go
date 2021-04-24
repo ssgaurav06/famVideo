@@ -3,6 +3,7 @@ package main
 import (
 	"fam/client"
 	"fam/config"
+	"fam/router"
 	"fam/storage"
 	"fmt"
 	"net/http"
@@ -22,5 +23,6 @@ func main() {
 	videoDataStorage := storage.NewVideoDataStorage(db)
 	youtubeClient := client.NewYoutubeClient(videoDataStorage)
 	go youtubeClient.GetClient()
-	http.ListenAndServe(":8080", nil)
+	r := router.Router()
+	http.ListenAndServe(":8080", r)
 }
