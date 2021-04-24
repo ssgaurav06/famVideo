@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fam/storage"
 	"flag"
 	"fmt"
 	"log"
@@ -11,15 +12,29 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
+type YoutubeClient interface {
+	GetClient()
+}
+type youtubeClient struct {
+	videoDataStore storage.VideoDataStorage
+}
+
+func NewYoutubeClient(vds storage.VideoDataStorage) YoutubeClient {
+	return &youtubeClient{videoDataStore: vds}
+}
+
 var (
-	query      = flag.String("query", "Cricket", "Search term")
-	maxResults = flag.Int64("max-results", 25, "Max YouTube results")
+	query          = flag.String("query", "Cricket", "Search term")
+	maxResults     = flag.Int64("max-results", 25, "Max YouTube results")
+	publishedAfter = time.Now().AddDate(0, 0, -1).UTC().Format(time.RFC3339)
 )
 
 const developerKey = "AIzaSyAdEZoZtIMjK0O1NM9b1vAUOcf5fMS_scs"
 
-func GetYoutubeClient() {
+func (yc youtubeClient) GetClient() {
 	flag.Parse()
+
+	fmt.Println("hello")
 
 	client := &http.Client{
 		Transport: &transport.APIKey{Key: developerKey},
@@ -31,37 +46,34 @@ func GetYoutubeClient() {
 	}
 
 	parts := []string{"id", "snippet"}
-	publishedAfter := time.Now().AddDate(0, 0, -1).UTC().Format(time.RFC3339)
-	fmt.Println(publishedAfter)
-	// Make the API call to YouTube.
-	call := service.Search.List(parts).
-		Type("video").
-		Order("date").
-		PublishedAfter(publishedAfter).
-		Q(*query).
-		MaxResults(*maxResults)
-	response, err := call.Do()
-	if err != nil {
-		fmt.Println("Youtube API call failed")
-		return
-	}
 
-	videos := make(map[string]string)
-
-	for _, item := range response.Items {
-		switch item.Id.Kind {
-		case "youtube#video":
-			videos[item.Id.VideoId] = item.Snippet.PublishedAt
+	for {
+		// Make the API call to YouTube.
+		call := service.Search.List(parts).
+			Type("video").
+			Order("date").
+			PublishedAfter(publishedAfter).
+			Q(*query).
+			MaxResults(*maxResults)
+		response, err := call.Do()
+		if err != nil {
+			fmt.Println("Youtube API call failed")
+			return
 		}
-	}
+		// Clear existing DB
+		if err := yc.videoDataStore.ClearDB(); err != nil {
+			fmt.Println("DB clear failed")
+			return
+		}
 
-	printIDs("Videos", videos)
-}
-
-func printIDs(sectionName string, matches map[string]string) {
-	fmt.Printf("%v:\n", sectionName)
-	for id, title := range matches {
-		fmt.Printf("[%v] %v\n", id, title)
+		//Insert video data into DB
+		fmt.Println("Insert Data into DB")
+		for _, item := range response.Items {
+			if err := yc.videoDataStore.Insert(item); err != nil {
+				fmt.Println("Item insertion failed")
+				return
+			}
+		}
+		time.Sleep(10 * time.Second)
 	}
-	fmt.Printf("\n\n")
 }

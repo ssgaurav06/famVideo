@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS videoData
 (
-    id             SERIAL PRIMARY KEY,
+    id             text        not null PRIMARY KEY,
     title          text        not null,
     description    text        not null,
     published_time timestamptz not null,

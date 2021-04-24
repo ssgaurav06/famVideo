@@ -3,7 +3,9 @@ package main
 import (
 	"fam/client"
 	"fam/config"
+	"fam/storage"
 	"fmt"
+	"net/http"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
@@ -12,9 +14,13 @@ func main() {
 	fmt.Println("Connecting to database...")
 	db := config.ConnectDB()
 	fmt.Println("Database successfully connected")
+	defer db.Close()
 	if err := db.Ping(); err != nil {
 		panic(err)
 	}
 	config.MigrateDB(db)
-	client.GetYoutubeClient()
+	videoDataStorage := storage.NewVideoDataStorage(db)
+	youtubeClient := client.NewYoutubeClient(videoDataStorage)
+	go youtubeClient.GetClient()
+	http.ListenAndServe(":8080", nil)
 }
