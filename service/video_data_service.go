@@ -18,5 +18,15 @@ func NewVideoDataService(videoDataStorage storage.VideoDataStorage) VideoDataSer
 }
 
 func (v videoDataService) GetData() ([]models.VideoData, error) {
-	panic("implement me")
+	var videoData []models.VideoData
+	res, err := v.videoDataStorage.Get()
+	if err != nil {
+		return videoData, err
+	}
+	var datum models.VideoData
+	for res.Next() {
+		res.Scan(&datum.Id, &datum.Title, &datum.Description, &datum.PublishedTime, &datum.Url)
+		videoData = append(videoData, datum)
+	}
+	return videoData, err
 }

@@ -34,8 +34,6 @@ const developerKey = "AIzaSyAdEZoZtIMjK0O1NM9b1vAUOcf5fMS_scs"
 func (yc youtubeClient) GetClient() {
 	flag.Parse()
 
-	fmt.Println("hello")
-
 	client := &http.Client{
 		Transport: &transport.APIKey{Key: developerKey},
 	}

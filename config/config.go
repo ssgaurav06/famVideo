@@ -2,6 +2,9 @@ package config
 
 import (
 	"database/sql"
+	"fam/handler"
+	"fam/service"
+	"fam/storage"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -40,4 +43,11 @@ func MigrateDB(db *sql.DB) {
 		panic(err)
 	}
 	fmt.Println("Ran all migrations")
+}
+
+func Init() handler.VideoDataHandler {
+	videoDataRepository := storage.NewVideoDataStorage(ConnectDB())
+	videoDataService := service.NewVideoDataService(videoDataRepository)
+	videoDataHandler := handler.NewVideoDataHandler(videoDataService)
+	return videoDataHandler
 }

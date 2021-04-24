@@ -1,8 +1,15 @@
 package router
 
-import "github.com/gorilla/mux"
+import (
+	"fam/config"
+	"net/http"
+
+	"github.com/gorilla/mux"
+)
 
 func Router() *mux.Router {
+	videoDataHandler := config.Init()
 	router := mux.NewRouter()
+	router.HandleFunc("/videoData", videoDataHandler.GetData).Methods(http.MethodGet)
 	return router
 }
