@@ -11,5 +11,6 @@ func Router() *mux.Router {
 	videoDataHandler := config.Init()
 	router := mux.NewRouter()
 	router.HandleFunc("/videoData", videoDataHandler.GetData).Methods(http.MethodGet)
+	router.HandleFunc("/search", videoDataHandler.SearchData).Methods(http.MethodGet)
 	return router
 }

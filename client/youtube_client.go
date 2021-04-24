@@ -29,7 +29,7 @@ var (
 	publishedAfter = time.Now().AddDate(0, 0, -1).UTC().Format(time.RFC3339)
 )
 
-const developerKey = "AIzaSyAdEZoZtIMjK0O1NM9b1vAUOcf5fMS_scs"
+const developerKey = "AIzaSyBANbalxqCZZZJm-LVmuwAMkmkFOva2ecQ"
 
 func (yc youtubeClient) GetClient() {
 	flag.Parse()
@@ -55,7 +55,7 @@ func (yc youtubeClient) GetClient() {
 			MaxResults(*maxResults)
 		response, err := call.Do()
 		if err != nil {
-			fmt.Println("Youtube API call failed")
+			fmt.Println("Youtube API call failed: ", err)
 			return
 		}
 		// Clear existing DB

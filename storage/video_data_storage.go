@@ -10,6 +10,7 @@ type VideoDataStorage interface {
 	Insert(item *youtube.SearchResult) error
 	ClearDB() error
 	Get() (*sql.Rows, error)
+	Search(query string) (*sql.Rows, error)
 }
 
 type VideoDataDB struct {
@@ -35,5 +36,11 @@ func (vds *VideoDataDB) Insert(item *youtube.SearchResult) error {
 func (vds VideoDataDB) Get() (*sql.Rows, error) {
 	sqlSt := `Select * from videoData ORDER BY published_time desc`
 	res, err := vds.DB.Query(sqlSt)
+	return res, err
+}
+
+func (vds VideoDataDB) Search(query string) (*sql.Rows, error) {
+	sqlSt := `Select * from videoData WHERE title = $1 OR description = $1 ORDER BY published_time desc`
+	res, err := vds.DB.Query(sqlSt, query)
 	return res, err
 }
