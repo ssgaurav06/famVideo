@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fam/constants"
 	"fam/service"
-	"fmt"
 	"net/http"
 )
 
@@ -35,7 +34,6 @@ func (v videoDataHandler) GetData(w http.ResponseWriter, _ *http.Request) {
 func (v videoDataHandler) SearchData(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	query := params[constants.Query][0]
-	fmt.Println(query)
 	data, err := v.videoDataService.SearchData(query)
 	w.Header().Set(constants.ContentType, constants.ApplicationJSONFormat)
 	if err != nil {

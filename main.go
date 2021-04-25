@@ -8,11 +8,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/joho/godotenv"
+
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
 	fmt.Println("Connecting to database...")
+	godotenv.Load()
 	db := config.ConnectDB()
 	fmt.Println("Database successfully connected")
 	defer db.Close()

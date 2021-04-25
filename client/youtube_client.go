@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"google.golang.org/api/googleapi/transport"
@@ -29,13 +30,11 @@ var (
 	publishedAfter = time.Now().AddDate(0, 0, -1).UTC().Format(time.RFC3339)
 )
 
-const developerKey = "AIzaSyBANbalxqCZZZJm-LVmuwAMkmkFOva2ecQ"
-
 func (yc youtubeClient) GetClient() {
 	flag.Parse()
 
 	client := &http.Client{
-		Transport: &transport.APIKey{Key: developerKey},
+		Transport: &transport.APIKey{Key: os.Getenv("DEVELOPER_KEY")},
 	}
 
 	service, err := youtube.New(client)
