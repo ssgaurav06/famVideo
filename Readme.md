@@ -12,6 +12,8 @@ The app should perform the following tasks:
 ***Bonus Features***
 
 * Add support for supplying multiple API keys so that if quota is exhausted on one, it automatically uses the next available key.
+* Optimise search api, so that it's able to search videos containing partial match for the search query in either video title or description.
+  But, while doing any query use `&` for spaces.
 
 **Dependencies**
 

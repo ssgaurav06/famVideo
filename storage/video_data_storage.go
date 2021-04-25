@@ -40,7 +40,7 @@ func (vds VideoDataDB) Get() (*sql.Rows, error) {
 }
 
 func (vds VideoDataDB) Search(query string) (*sql.Rows, error) {
-	sqlSt := `Select * from videoData WHERE title = $1 OR description = $1 ORDER BY published_time desc`
+	sqlSt := `Select * from videoData WHERE to_tsvector(title) @@ to_tsquery($1) OR to_tsvector(description) @@ to_tsquery($1) ORDER BY published_time desc`
 	res, err := vds.DB.Query(sqlSt, query)
 	return res, err
 }
