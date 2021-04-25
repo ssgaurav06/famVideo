@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"google.golang.org/api/googleapi/transport"
@@ -33,44 +34,48 @@ var (
 func (yc youtubeClient) GetClient() {
 	flag.Parse()
 
-	client := &http.Client{
-		Transport: &transport.APIKey{Key: os.Getenv("DEVELOPER_KEY")},
-	}
+	developerKeys := os.Getenv("DEVELOPER_KEYS")
+	for _, developerKey := range strings.Split(developerKeys, ",") {
+		client := &http.Client{
+			Transport: &transport.APIKey{Key: developerKey},
+		}
 
-	service, err := youtube.New(client)
-	if err != nil {
-		log.Fatalf("Error creating new YouTube client: %v", err)
-	}
-
-	parts := []string{"id", "snippet"}
-
-	for {
-		// Make the API call to YouTube.
-		call := service.Search.List(parts).
-			Type("video").
-			Order("date").
-			PublishedAfter(publishedAfter).
-			Q(*query).
-			MaxResults(*maxResults)
-		response, err := call.Do()
+		service, err := youtube.New(client)
 		if err != nil {
-			fmt.Println("Youtube API call failed: ", err)
-			return
-		}
-		// Clear existing DB
-		if err := yc.videoDataStore.ClearDB(); err != nil {
-			fmt.Println("DB clear failed")
-			return
+			log.Fatalf("Error creating new YouTube client: %v", err)
+			continue
 		}
 
-		//Insert video data into DB
-		fmt.Println("Insert Data into DB")
-		for _, item := range response.Items {
-			if err := yc.videoDataStore.Insert(item); err != nil {
-				fmt.Println("Item insertion failed")
+		parts := []string{"id", "snippet"}
+
+		for {
+			// Make the API call to YouTube.
+			call := service.Search.List(parts).
+				Type("video").
+				Order("date").
+				PublishedAfter(publishedAfter).
+				Q(*query).
+				MaxResults(*maxResults)
+			response, err := call.Do()
+			if err != nil {
+				fmt.Println("Youtube API call failed: ", err)
+				break
+			}
+			// Clear existing DB
+			if err := yc.videoDataStore.ClearDB(); err != nil {
+				fmt.Println("DB clear failed")
 				return
 			}
+
+			//Insert video data into DB
+			fmt.Println("Insert Data into DB")
+			for _, item := range response.Items {
+				if err := yc.videoDataStore.Insert(item); err != nil {
+					fmt.Println("Item insertion failed")
+					return
+				}
+			}
+			time.Sleep(10 * time.Second)
 		}
-		time.Sleep(10 * time.Second)
 	}
 }
